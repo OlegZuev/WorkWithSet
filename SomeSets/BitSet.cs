@@ -1,36 +1,36 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
 namespace SomeSets {
-    public class SimpleSet : MySet {
-        private readonly bool[] _array;
+    public class BitSet : MySet {
+        private readonly ulong[] _array;
+        private const long Base64 = 64;
 
-        public SimpleSet(long size) {
-            _array = new bool[size + 1];
+        public BitSet(long size) {
+            _array = new ulong[(size + Base64) / Base64];
         }
 
         public override void Add(ulong value) {
-            _array[value] = true;
+            _array[value / Base64] |= (uint) (1 << (int) (value % Base64));
         }
 
         public override void Delete(ulong value) {
-            _array[value] = false;
+            _array[value / Base64] &= ~(uint) (1 << (int) (value % Base64));
         }
 
         public override bool Exists(ulong value) {
-            return _array[value];
+            return (_array[value / Base64] & (uint) (1 << (int) (value % Base64))) != 0;
         }
 
-        public static SimpleSet operator +(SimpleSet lValue, SimpleSet rValue) {
+        public static BitSet operator +(BitSet lValue, BitSet rValue) {
             Contract.Assert(lValue != null);
             Contract.Assert(rValue != null);
 
             var (minArray, maxArray) = MinAndMax(lValue._array, rValue._array);
-            var result = new SimpleSet(maxArray.Length);
+            var result = new BitSet(maxArray.Length);
             long i = 0;
             for (; i < minArray.Length; i++) {
-                result._array[i] = minArray[i] || maxArray[i];
+                result._array[i] = minArray[i] | maxArray[i];
             }
 
             for (; i < maxArray.Length; i++) {
@@ -40,15 +40,15 @@ namespace SomeSets {
             return result;
         }
 
-        public static SimpleSet operator *(SimpleSet lValue, SimpleSet rValue) {
+        public static BitSet operator *(BitSet lValue, BitSet rValue) {
             Contract.Assert(lValue != null);
             Contract.Assert(rValue != null);
 
             var (minArray, maxArray) = MinAndMax(lValue._array, rValue._array);
-            var result = new SimpleSet(maxArray.Length);
+            var result = new BitSet(maxArray.Length);
             long i = 0;
             for (; i < minArray.Length; i++) {
-                result._array[i] = minArray[i] && maxArray[i];
+                result._array[i] = minArray[i] & maxArray[i];
             }
 
             for (; i < maxArray.Length; i++) {
@@ -60,8 +60,8 @@ namespace SomeSets {
 
         public override string ToString() {
             string result = string.Empty;
-            for (int i = 0; i < _array.Length; i++) {
-                if (_array[i]) {
+            for (long i = 0; i < _array.Length * Base64; i++) {
+                if (Exists((ulong) i)) {
                     result += i + " ";
                 }
             }
