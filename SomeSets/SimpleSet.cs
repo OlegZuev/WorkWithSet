@@ -9,10 +9,12 @@ namespace SomeSets {
         private readonly bool[] _array;
 
         public SimpleSet(ulong size) {
-            Contract.Requires<IndexOutOfMySetRangeException>(size < ulong.MaxValue, "size < ulong.MaxValue");
+            if (!(size < ulong.MaxValue))
+                throw new IndexOutOfMySetRangeException("size < ulong.MaxValue");
 
             _array = new bool[size + 1];
             Empty = false;
+            MaxAllowedNumber = size;
         }
 
         protected override bool Empty { get; }
@@ -20,6 +22,8 @@ namespace SomeSets {
         protected override bool[] GetArray() {
             return _array;
         }
+
+        protected override ulong MaxAllowedNumber { get; }
 
         public override void Add(ulong value) {
             _array[value] = true;
@@ -39,10 +43,6 @@ namespace SomeSets {
 
         public static SimpleSet operator *(SimpleSet lValue, SimpleSet rValue) {
             return (SimpleSet) OperatorBase((left, right) => left && right, lValue, rValue);
-        }
-
-        public override string ToString() {
-            return base.ToString((ulong) _array.Length);
         }
     }
 }

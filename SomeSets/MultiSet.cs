@@ -7,10 +7,12 @@ namespace SomeSets {
         private readonly ulong[] _array;
 
         public MultiSet(ulong size) {
-            Contract.Requires<IndexOutOfMySetRangeException>(size < ulong.MaxValue, "size < ulong.MaxValue");
+            if (!(size < ulong.MaxValue))
+                throw new IndexOutOfMySetRangeException("size < ulong.MaxValue");
 
             _array = new ulong[size + 1];
             Empty = 0;
+            MaxAllowedNumber = size;
         }
 
         protected override ulong Empty { get; }
@@ -19,12 +21,15 @@ namespace SomeSets {
             return _array;
         }
 
+        protected override ulong MaxAllowedNumber { get; }
+
         public override void Add(ulong value) {
             _array[value]++;
         }
 
         public override void Delete(ulong value) {
-            Contract.Requires<IndexOutOfMySetRangeException>(value > 0, "value > 0");
+            if (!(value > 0))
+                throw new IndexOutOfMySetRangeException("value > 0");
 
             _array[value]--;
         }
@@ -39,10 +44,6 @@ namespace SomeSets {
 
         public static MultiSet operator *(MultiSet lValue, MultiSet rValue) {
             return (MultiSet) OperatorBase(Math.Min, lValue, rValue);
-        }
-
-        public override string ToString() {
-            return base.ToString((ulong) _array.Length);
         }
     }
 }

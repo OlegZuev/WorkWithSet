@@ -8,10 +8,12 @@ namespace SomeSets {
         private const ulong Base64 = 64;
 
         public BitSet(ulong size) {
-            Contract.Assert(size < ulong.MaxValue - Base64, "size < ulong.MaxValue - Base64");
+            if (size < ulong.MaxValue - Base64)
+                throw new IndexOutOfMySetRangeException("size < ulong.MaxValue - Base64");
 
             _array = new ulong[(size + Base64) / Base64];
             Empty = 0;
+            MaxAllowedNumber = size;
         }
 
         protected override ulong Empty { get; }
@@ -20,28 +22,26 @@ namespace SomeSets {
             return _array;
         }
 
+        protected override ulong MaxAllowedNumber { get; }
+
         public override void Add(ulong value) {
-            _array[value / Base64] |= (uint) (1 << (int) (value % Base64));
+            _array[value / Base64] |= 1UL << (int) (value % Base64);
         }
 
         public override void Delete(ulong value) {
-            _array[value / Base64] &= ~(uint) (1 << (int) (value % Base64));
+            _array[value / Base64] &= ~1UL << (int) (value % Base64);
         }
 
         public override bool Exists(ulong value) {
-            return (_array[value / Base64] & (uint) (1 << (int) (value % Base64))) != 0;
+            return (_array[value / Base64] & (1UL << (int) (value % Base64))) != 0;
         }
 
         public static BitSet operator +(BitSet lValue, BitSet rValue) {
-            return (BitSet) OperatorBase((left, right) => (ulong) left | (ulong) right, lValue, rValue);
+            return (BitSet) OperatorBase((left, right) => left | right, lValue, rValue);
         }
 
         public static BitSet operator *(BitSet lValue, BitSet rValue) {
-            return (BitSet) OperatorBase((left, right) => (ulong) left & (ulong) right, lValue, rValue);
-        }
-
-        public override string ToString() {
-            return base.ToString((ulong)_array.Length * Base64);
+            return (BitSet) OperatorBase((left, right) => left & right, lValue, rValue);
         }
     }
 }

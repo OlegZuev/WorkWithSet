@@ -13,6 +13,8 @@ namespace SomeSets {
 
         protected abstract T[] GetArray();
 
+        protected abstract ulong MaxAllowedNumber { get; }
+
         public abstract void Add(ulong value);
 
         public abstract void Delete(ulong value);
@@ -40,10 +42,11 @@ namespace SomeSets {
             Contract.Assert(lValue != null, "lValue != null");
             Contract.Assert(rValue != null, "rValue != null");
 
-            var lArray = lValue.GetArray();
-            var rArray = rValue.GetArray();
-            var (minArray, maxArray) = lArray.Length < rArray.Length ? (lArray, rArray) : (rArray, lArray);
-            var result = (MySet<T>) Activator.CreateInstance(typeof(TMySet), (ulong) maxArray.Length - 1);
+            
+            (TMySet minValue, TMySet maxValue) = lValue.MaxAllowedNumber < rValue.MaxAllowedNumber ? (lValue, rValue) : (rValue, lValue);
+            var minArray = minValue.GetArray();
+            var maxArray = maxValue.GetArray();
+            var result = (MySet<T>) Activator.CreateInstance(typeof(TMySet), maxValue.MaxAllowedNumber);
 
             ulong i = 0;
             for (; i < (ulong) minArray.Length; i++) {
@@ -57,9 +60,9 @@ namespace SomeSets {
             return result;
         }
 
-        public string ToString(ulong size) {
+        public override string ToString() {
             string result = string.Empty;
-            for (ulong i = 0; i < size; i++) {
+            for (ulong i = 0; i < MaxAllowedNumber; i++) {
                 if (Exists(i)) {
                     result += i + " ";
                 }
