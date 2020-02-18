@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace SomeSets {
     public class BitSet : MySet {
@@ -8,6 +9,10 @@ namespace SomeSets {
 
         public BitSet(long size) {
             _array = new ulong[(size + Base64) / Base64];
+        }
+
+        protected override object[] GetArray() {
+            return _array.Cast<object>().ToArray();
         }
 
         public override void Add(ulong value) {
@@ -23,39 +28,11 @@ namespace SomeSets {
         }
 
         public static BitSet operator +(BitSet lValue, BitSet rValue) {
-            Contract.Assert(lValue != null);
-            Contract.Assert(rValue != null);
-
-            var (minArray, maxArray) = MinAndMax(lValue._array, rValue._array);
-            var result = new BitSet(maxArray.Length);
-            long i = 0;
-            for (; i < minArray.Length; i++) {
-                result._array[i] = minArray[i] | maxArray[i];
-            }
-
-            for (; i < maxArray.Length; i++) {
-                result._array[i] = maxArray[i];
-            }
-
-            return result;
+            return (BitSet) OperatorBase((left, right) => (bool) left | (bool) right, lValue, rValue);
         }
 
         public static BitSet operator *(BitSet lValue, BitSet rValue) {
-            Contract.Assert(lValue != null);
-            Contract.Assert(rValue != null);
-
-            var (minArray, maxArray) = MinAndMax(lValue._array, rValue._array);
-            var result = new BitSet(maxArray.Length);
-            long i = 0;
-            for (; i < minArray.Length; i++) {
-                result._array[i] = minArray[i] & maxArray[i];
-            }
-
-            for (; i < maxArray.Length; i++) {
-                result._array[i] = maxArray[i];
-            }
-
-            return result;
+            return (BitSet) OperatorBase((left, right) => (bool) left & (bool) right, lValue, rValue);
         }
 
         public override string ToString() {

@@ -1,0 +1,26 @@
+﻿<Window x:Class="SetsDemonstration.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SetsDemonstration"
+        xmlns:viewModel="clr-namespace:SetsDemonstration.ViewModel"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="500">
+    <Window.DataContext>
+        <viewModel:MainWindowViewModel x:Name="ViewModel"/>
+    </Window.DataContext>
+    <Grid>
+        <Border Margin="10">
+            <StackPanel>
+                <TextBlock Text="Введите множество" FontSize="16"/>
+                <TextBox Padding="2" Text="{Binding InputText}"/>
+
+                <TextBlock Text="Результат" FontSize="16"/>
+                <TextBox Padding="2" IsReadOnly="True" Text="{Binding OutputText}"/>
+
+                <Button Name="Process" Content="Посчитать" FontSize="16" Margin="20 30 20 0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

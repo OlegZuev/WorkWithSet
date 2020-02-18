@@ -10,6 +10,10 @@ namespace SomeSets {
             _array = new bool[size + 1];
         }
 
+        protected override object[] GetArray() {
+            return _array.Cast<object>().ToArray();
+        }
+
         public override void Add(ulong value) {
             _array[value] = true;
         }
@@ -23,39 +27,11 @@ namespace SomeSets {
         }
 
         public static SimpleSet operator +(SimpleSet lValue, SimpleSet rValue) {
-            Contract.Assert(lValue != null);
-            Contract.Assert(rValue != null);
-
-            var (minArray, maxArray) = MinAndMax(lValue._array, rValue._array);
-            var result = new SimpleSet(maxArray.Length);
-            long i = 0;
-            for (; i < minArray.Length; i++) {
-                result._array[i] = minArray[i] || maxArray[i];
-            }
-
-            for (; i < maxArray.Length; i++) {
-                result._array[i] = maxArray[i];
-            }
-
-            return result;
+            return (SimpleSet) OperatorBase((left, right) => (bool) left && (bool) right, lValue, rValue);
         }
 
         public static SimpleSet operator *(SimpleSet lValue, SimpleSet rValue) {
-            Contract.Assert(lValue != null);
-            Contract.Assert(rValue != null);
-
-            var (minArray, maxArray) = MinAndMax(lValue._array, rValue._array);
-            var result = new SimpleSet(maxArray.Length);
-            long i = 0;
-            for (; i < minArray.Length; i++) {
-                result._array[i] = minArray[i] && maxArray[i];
-            }
-
-            for (; i < maxArray.Length; i++) {
-                result._array[i] = maxArray[i];
-            }
-
-            return result;
+            return (SimpleSet) OperatorBase((left, right) => (bool) left || (bool) right, lValue, rValue);
         }
 
         public override string ToString() {
