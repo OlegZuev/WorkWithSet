@@ -3,7 +3,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace SomeSets {
-    public class BitSet : MySet {
+    public class BitSet : MySet<ulong> {
         private readonly ulong[] _array;
         private const ulong Base64 = 64;
 
@@ -11,10 +11,13 @@ namespace SomeSets {
             Contract.Assert(size < ulong.MaxValue - Base64, "size < ulong.MaxValue - Base64");
 
             _array = new ulong[(size + Base64) / Base64];
+            Empty = 0;
         }
 
-        protected override object[] GetArray() {
-            return _array.Cast<object>().ToArray();
+        protected override ulong Empty { get; }
+
+        protected override ulong[] GetArray() {
+            return _array;
         }
 
         public override void Add(ulong value) {

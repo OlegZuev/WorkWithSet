@@ -7,8 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace SomeSets {
-    public abstract class MySet {
-        protected abstract object[] GetArray();
+    public abstract class MySet<T> {
+
+        protected abstract T Empty { get; }
+
+        protected abstract T[] GetArray();
 
         public abstract void Add(ulong value);
 
@@ -26,40 +29,32 @@ namespace SomeSets {
             array.ToList().ForEach(Add);
         }
 
-        public void Print(Action<MySet> printAction) {
+        public void Print(Action<MySet<T>> printAction) {
             Contract.Assert(printAction != null, "printAction != null");
 
             printAction(this);
         }
 
-        public static (T[], T[]) MinAndMax<T>(T[] lValue, T[] rValue) {
+        protected static MySet<T> OperatorBase<TMySet>(Func<T, T, T> operation, TMySet lValue, TMySet rValue)
+            where TMySet : MySet<T> {
             Contract.Assert(lValue != null, "lValue != null");
             Contract.Assert(rValue != null, "rValue != null");
 
-            return lValue.Length < rValue.Length ? (lValue, rValue) : (rValue, lValue);
-        }
+            var lArray = lValue.GetArray();
+            var rArray = rValue.GetArray();
+            var (minArray, maxArray) = lArray.Length < rArray.Length ? (lArray, rArray) : (rArray, lArray);
+            var result = (MySet<T>) Activator.CreateInstance(typeof(TMySet), (ulong) maxArray.Length - 1);
 
-        protected static MySet OperatorBase<T>(Func<object, object, object> operation, T lValue, T rValue)
-            where T : MySet {
-            Contract.Assert(lValue != null, "lValue != null");
-            Contract.Assert(rValue != null, "rValue != null");
-
-            var (minArray, maxArray) = MinAndMax(lValue.GetArray(), rValue.GetArray());
-            MySet result = GenerateNew(typeof(T), maxArray.Length);
-            long i = 0;
-            for (; i < minArray.Length; i++) {
-                result.GetArray()[i] = operation(minArray[i], minArray[i]);
+            ulong i = 0;
+            for (; i < (ulong) minArray.Length; i++) {
+                result.GetArray()[i] = operation(minArray[i], maxArray[i]);
             }
 
-            for (; i < maxArray.Length; i++) {
-                result.GetArray()[i] = maxArray[i];
+            for (; i < (ulong) maxArray.Length; i++) {
+                result.GetArray()[i] = operation(lValue.Empty, maxArray[i]);
             }
 
             return result;
-        }
-
-        public static MySet GenerateNew(Type T, long size) {
-            return (MySet) Activator.CreateInstance(T, size);
         }
 
         public string ToString(ulong size) {

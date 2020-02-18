@@ -3,17 +3,20 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace SomeSets {
-    public class MultiSet : MySet {
+    public class MultiSet : MySet<ulong> {
         private readonly ulong[] _array;
 
         public MultiSet(ulong size) {
-            Contract.Assert(size < ulong.MaxValue, "size < ulong.MaxValue");
+            Contract.Requires<IndexOutOfMySetRangeException>(size < ulong.MaxValue, "size < ulong.MaxValue");
 
             _array = new ulong[size + 1];
+            Empty = 0;
         }
 
-        protected override object[] GetArray() {
-            return _array.Cast<object>().ToArray();
+        protected override ulong Empty { get; }
+
+        protected override ulong[] GetArray() {
+            return _array;
         }
 
         public override void Add(ulong value) {
@@ -21,7 +24,7 @@ namespace SomeSets {
         }
 
         public override void Delete(ulong value) {
-            Contract.Assert(value > 0, "value > 0");
+            Contract.Requires<IndexOutOfMySetRangeException>(value > 0, "value > 0");
 
             _array[value]--;
         }
@@ -31,11 +34,11 @@ namespace SomeSets {
         }
 
         public static MultiSet operator +(MultiSet lValue, MultiSet rValue) {
-            return (MultiSet) OperatorBase((left, right) => (ulong) left + (ulong) right, lValue, rValue);
+            return (MultiSet) OperatorBase((left, right) => left + right, lValue, rValue);
         }
 
         public static MultiSet operator *(MultiSet lValue, MultiSet rValue) {
-            return (MultiSet)OperatorBase((left, right) => Math.Min((ulong)left, (ulong)right), lValue, rValue);
+            return (MultiSet) OperatorBase(Math.Min, lValue, rValue);
         }
 
         public override string ToString() {

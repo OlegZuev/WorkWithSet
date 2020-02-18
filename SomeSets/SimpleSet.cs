@@ -1,19 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 
 namespace SomeSets {
-    public class SimpleSet : MySet {
+    public class SimpleSet : MySet<bool> {
         private readonly bool[] _array;
 
         public SimpleSet(ulong size) {
-            Contract.Assert(size < ulong.MaxValue, "size < ulong.MaxValue");
+            Contract.Requires<IndexOutOfMySetRangeException>(size < ulong.MaxValue, "size < ulong.MaxValue");
 
             _array = new bool[size + 1];
+            Empty = false;
         }
 
-        protected override object[] GetArray() {
-            return _array.Cast<object>().ToArray();
+        protected override bool Empty { get; }
+
+        protected override bool[] GetArray() {
+            return _array;
         }
 
         public override void Add(ulong value) {
@@ -29,11 +34,11 @@ namespace SomeSets {
         }
 
         public static SimpleSet operator +(SimpleSet lValue, SimpleSet rValue) {
-            return (SimpleSet) OperatorBase((left, right) => (bool) left && (bool) right, lValue, rValue);
+            return (SimpleSet) OperatorBase((left, right) => left || right, lValue, rValue);
         }
 
         public static SimpleSet operator *(SimpleSet lValue, SimpleSet rValue) {
-            return (SimpleSet) OperatorBase((left, right) => (bool) left || (bool) right, lValue, rValue);
+            return (SimpleSet) OperatorBase((left, right) => left && right, lValue, rValue);
         }
 
         public override string ToString() {
