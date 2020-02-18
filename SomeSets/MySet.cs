@@ -61,5 +61,16 @@ namespace SomeSets {
         public static MySet GenerateNew(Type T, long size) {
             return (MySet) Activator.CreateInstance(T, size);
         }
+
+        public string ToString(ulong size) {
+            string result = string.Empty;
+            for (ulong i = 0; i < size; i++) {
+                if (Exists(i)) {
+                    result += i + " ";
+                }
+            }
+
+            return string.IsNullOrEmpty(result) ? string.Empty : result.Substring(0, result.Length - 1);
+        }
     }
 }

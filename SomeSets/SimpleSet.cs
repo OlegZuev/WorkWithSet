@@ -6,7 +6,9 @@ namespace SomeSets {
     public class SimpleSet : MySet {
         private readonly bool[] _array;
 
-        public SimpleSet(long size) {
+        public SimpleSet(ulong size) {
+            Contract.Assert(size < ulong.MaxValue, "size < ulong.MaxValue");
+
             _array = new bool[size + 1];
         }
 
@@ -35,14 +37,7 @@ namespace SomeSets {
         }
 
         public override string ToString() {
-            string result = string.Empty;
-            for (int i = 0; i < _array.Length; i++) {
-                if (_array[i]) {
-                    result += i + " ";
-                }
-            }
-
-            return string.IsNullOrEmpty(result) ? string.Empty : result.Substring(0, result.Length - 1);
+            return base.ToString((ulong) _array.Length);
         }
     }
 }

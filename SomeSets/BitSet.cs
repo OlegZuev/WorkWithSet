@@ -5,9 +5,11 @@ using System.Linq;
 namespace SomeSets {
     public class BitSet : MySet {
         private readonly ulong[] _array;
-        private const long Base64 = 64;
+        private const ulong Base64 = 64;
 
-        public BitSet(long size) {
+        public BitSet(ulong size) {
+            Contract.Assert(size < ulong.MaxValue - Base64, "size < ulong.MaxValue - Base64");
+
             _array = new ulong[(size + Base64) / Base64];
         }
 
@@ -28,22 +30,15 @@ namespace SomeSets {
         }
 
         public static BitSet operator +(BitSet lValue, BitSet rValue) {
-            return (BitSet) OperatorBase((left, right) => (bool) left | (bool) right, lValue, rValue);
+            return (BitSet) OperatorBase((left, right) => (ulong) left | (ulong) right, lValue, rValue);
         }
 
         public static BitSet operator *(BitSet lValue, BitSet rValue) {
-            return (BitSet) OperatorBase((left, right) => (bool) left & (bool) right, lValue, rValue);
+            return (BitSet) OperatorBase((left, right) => (ulong) left & (ulong) right, lValue, rValue);
         }
 
         public override string ToString() {
-            string result = string.Empty;
-            for (long i = 0; i < _array.Length * Base64; i++) {
-                if (Exists((ulong) i)) {
-                    result += i + " ";
-                }
-            }
-
-            return string.IsNullOrEmpty(result) ? string.Empty : result.Substring(0, result.Length - 1);
+            return base.ToString((ulong)_array.Length * Base64);
         }
     }
 }
