@@ -5,21 +5,144 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SetsDemonstration"
         xmlns:viewModel="clr-namespace:SetsDemonstration.ViewModel"
+        xmlns:model="clr-namespace:SetsDemonstration.Model"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="500">
+        ResizeMode="CanMinimize"
+        FontSize="16"
+        Title="Работа со множествами" Height="470" Width="600">
     <Window.DataContext>
-        <viewModel:MainWindowViewModel x:Name="ViewModel"/>
+        <viewModel:MainWindowViewModel x:Name="ViewModel" />
     </Window.DataContext>
     <Grid>
         <Border Margin="10">
             <StackPanel>
-                <TextBlock Text="Введите множество" FontSize="16"/>
-                <TextBox Padding="2" Text="{Binding InputText}"/>
+                <!-- Добавление множества -->
+                <GroupBox Header="Добавление">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="100" />
+                        </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Результат" FontSize="16"/>
-                <TextBox Padding="2" IsReadOnly="True" Text="{Binding OutputText}"/>
+                        <!-- Допустимые множества -->
+                        <ComboBox Name="NewSets" Grid.Column="0" SelectedIndex="0" Margin="0 5"
+                                  ItemsSource="{Binding SetsType}" />
 
-                <Button Name="Process" Content="Посчитать" FontSize="16" Margin="20 30 20 0"/>
+                        <Button Grid.Column="1" Content="Добавить" Margin="10 5" HorizontalAlignment="Right"
+                                Command="{Binding AddNewSetCommand}"
+                                CommandParameter="{Binding ElementName=NewSets, Path=SelectedItem}" />
+                    </Grid>
+                </GroupBox>
+
+                <!-- Взаимодействие с множеством -->
+                <GroupBox Header="Взаимодействие с множеством" Margin="0 10">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="170" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="Выберете множество:" VerticalAlignment="Center" />
+
+                            <!-- Выбор существующего множества -->
+                            <ComboBox x:Name="CbSets" Grid.Column="1" ItemsSource="{Binding MySetsWrapper}"
+                                      SelectedItem="{Binding SelectedMySetWrapper}"
+                                      VerticalAlignment="Center"
+                                      Margin="5" DisplayMemberPath="Name" />
+                        </Grid>
+
+                        <!-- Содержимое множества -->
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Disabled"
+                                      MaxHeight="50">
+                            <TextBlock
+                                TextWrapping="Wrap"
+                                Text="{Binding Path=SelectedMySetWrapper.MySet, 
+                                               UpdateSourceTrigger=PropertyChanged}"
+
+                                Margin="5" />
+                        </ScrollViewer>
+
+                        <!-- Ввод данных -->
+                        <Grid Margin="0 5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="45" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="Ввод:" VerticalAlignment="Center" />
+                            <TextBox Name="TbInputText" Grid.Column="1" Padding="2" />
+                        </Grid>
+
+                        <!-- Операции над множеством -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="30" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button Grid.Column="0" Content="Добавить" Margin="10 5"
+                                    Command="{Binding AddValueInSetCommand}"
+                                    CommandParameter="{Binding ElementName=TbInputText, Path=Text}"/>
+                            <Button Grid.Column="1" Content="Удалить" Margin="10 5"
+                                    Command="{Binding RemoveValueFromSetCommand}"
+                                    CommandParameter="{Binding ElementName=TbInputText, Path=Text}" />
+                            <Button Grid.Column="2" Content="Проверить" Margin="10 5"
+                                    Command="{Binding ExistsValueInSetCommand}"
+                                    CommandParameter="{Binding ElementName=TbInputText, Path=Text}" />
+
+                            <Image Grid.Column="3" Source="{Binding ImgResultPath}" Margin="5" Visibility="Visible" />
+                        </Grid>
+
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Операции над множествами -->
+                <GroupBox Header="Операции над множествами">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox Grid.Column="0" ItemsSource="{Binding MySetsWrapper}" DisplayMemberPath="Name"
+                                      Margin="5"
+                                      SelectedItem="{Binding LeftMySetForCompute}"/>
+                            <ComboBox Name="CbOperation" Grid.Column="1" ItemsSource="{Binding SetsOperations}" Margin="5" />
+                            <ComboBox Grid.Column="2" ItemsSource="{Binding MySetsWrapper}" DisplayMemberPath="Name"
+                                      Margin="5"
+                                      SelectedItem="{Binding RightMySetForCompute}"/>
+                        </Grid>
+
+                        <!-- Вычислить операцию -->
+                        <Button Content="Вычислить" HorizontalAlignment="Right" Margin="0 10" Width="90"
+                                Command="{Binding ComputeOperationCommand}"
+                                CommandParameter="{Binding ElementName=CbOperation, Path=SelectedItem}"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="90" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Вывод результата операции над множествами -->
+                            <TextBlock Grid.Column="0" Text="Результат:" VerticalAlignment="Center" />
+                            <ScrollViewer Grid.Column="1"
+                                          VerticalScrollBarVisibility="Auto"
+                                          MaxHeight="50">
+                                <TextBlock
+                                    TextWrapping="Wrap"
+                                    Text="{Binding ResultOfComputeMySet}"
+                                    Margin="5" />
+                            </ScrollViewer>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
         </Border>
     </Grid>

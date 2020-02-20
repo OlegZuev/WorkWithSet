@@ -8,7 +8,7 @@ namespace SomeSets {
         private const ulong Base64 = 64;
 
         public BitSet(ulong size) {
-            if (size < ulong.MaxValue - Base64)
+            if (!(size < ulong.MaxValue - Base64))
                 throw new IndexOutOfMySetRangeException("size < ulong.MaxValue - Base64");
 
             _array = new ulong[(size + Base64) / Base64];
@@ -25,14 +25,23 @@ namespace SomeSets {
         protected override ulong MaxAllowedNumber { get; }
 
         public override void Add(ulong value) {
+            if (value > MaxAllowedNumber)
+                throw new IndexOutOfMySetRangeException($"Недопустимое значение. Принимаются только натуральные числа до {MaxAllowedNumber}");
+
             _array[value / Base64] |= 1UL << (int) (value % Base64);
         }
 
         public override void Delete(ulong value) {
-            _array[value / Base64] &= ~1UL << (int) (value % Base64);
+            if (value > MaxAllowedNumber)
+                throw new IndexOutOfMySetRangeException($"Недопустимое значение. Принимаются только натуральные числа до {MaxAllowedNumber}");
+
+            _array[value / Base64] &= ~(1UL << (int) (value % Base64));
         }
 
         public override bool Exists(ulong value) {
+            if (value > MaxAllowedNumber)
+                throw new IndexOutOfMySetRangeException($"Недопустимое значение. Принимаются только натуральные числа до {MaxAllowedNumber}");
+
             return (_array[value / Base64] & (1UL << (int) (value % Base64))) != 0;
         }
 

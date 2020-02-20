@@ -84,6 +84,7 @@
     <Compile Include="MultiSet.cs" />
     <Compile Include="IndexOutOfMySetRangeException.cs" />
     <Compile Include="MySet.cs" />
+    <Compile Include="MySetBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleSet.cs" />
   </ItemGroup>

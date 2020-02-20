@@ -26,14 +26,23 @@ namespace SomeSets {
         protected override ulong MaxAllowedNumber { get; }
 
         public override void Add(ulong value) {
+            if (value > MaxAllowedNumber)
+                throw new IndexOutOfMySetRangeException($"Недопустимое значение. Принимаются только натуральные числа до {MaxAllowedNumber}");
+
             _array[value] = true;
         }
 
         public override void Delete(ulong value) {
+            if (value > MaxAllowedNumber)
+                throw new IndexOutOfMySetRangeException($"Недопустимое значение. Принимаются только натуральные числа до {MaxAllowedNumber}");
+
             _array[value] = false;
         }
 
         public override bool Exists(ulong value) {
+            if (value > MaxAllowedNumber)
+                throw new IndexOutOfMySetRangeException($"Недопустимое значение. Принимаются только натуральные числа до {MaxAllowedNumber}");
+
             return _array[value];
         }
 

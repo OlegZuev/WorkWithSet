@@ -24,17 +24,25 @@ namespace SomeSets {
         protected override ulong MaxAllowedNumber { get; }
 
         public override void Add(ulong value) {
+            if (value > MaxAllowedNumber)
+                throw new IndexOutOfMySetRangeException($"Недопустимое значение. Принимаются только натуральные числа до {MaxAllowedNumber}");
+
             _array[value]++;
         }
 
         public override void Delete(ulong value) {
-            if (!(value > 0))
-                throw new IndexOutOfMySetRangeException("value > 0");
-
-            _array[value]--;
+            if (value > MaxAllowedNumber)
+                throw new IndexOutOfMySetRangeException($"Недопустимое значение. Принимаются только натуральные числа до {MaxAllowedNumber}");
+            
+            if (Exists(value)) {
+                _array[value]--;
+            }
         }
 
         public override bool Exists(ulong value) {
+            if (value > MaxAllowedNumber)
+                throw new IndexOutOfMySetRangeException($"Недопустимое значение. Принимаются только натуральные числа до {MaxAllowedNumber}");
+
             return _array[value] > 0;
         }
 
