@@ -40,7 +40,7 @@ namespace SomeSets {
 
         public override string ToString() {
             string result = string.Empty;
-            for (ulong i = 0; i < MaxAllowedNumber; i++) {
+            for (ulong i = 0; i <= MaxAllowedNumber; i++) {
                 if (Exists(i)) {
                     result += i + " ";
                 }

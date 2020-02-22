@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using SetsDemonstration.Model;
 using SomeSets;
 
@@ -14,6 +15,16 @@ namespace SetsDemonstration.ViewModel {
         public ObservableCollection<string> SetsOperations { get; }
 
         public ObservableCollection<MySetBaseWrapper> MySetsWrapper { get; }
+
+        private string _mySetSize;
+
+        public string MySetSize {
+            get => _mySetSize;
+            set {
+                _mySetSize = value;
+                OnPropertyChanged(nameof(MySetSize));
+            }
+        }
 
         private MySetBaseWrapper _selectedMySetWrapper;
 
@@ -47,19 +58,29 @@ namespace SetsDemonstration.ViewModel {
 
         public MySetBase ResultOfComputeMySet { get; set; }
 
-        private readonly Dictionary<int, string> _imgResultPaths = new Dictionary<int, string> {
-            {0, "../Images/DontExists.png"},
-            {1, "../Images/SomeExists.png"},
-            {2, "../Images/AllExists.png"}
+        private readonly Dictionary<int, Brush> _checkingResultBrushes = new Dictionary<int, Brush> {
+            {0, Brushes.Red},
+            {1, Brushes.Yellow},
+            {2, Brushes.Green}
         };
 
-        private string _imgResultPath;
+        private Brush _checkingResultBrush;
 
-        public string ImgResultPath {
-            get => _imgResultPath;
+        public Brush CheckingResultBrush {
+            get => _checkingResultBrush;
             set {
-                _imgResultPath = value;
-                OnPropertyChanged(nameof(ImgResultPath));
+                _checkingResultBrush = value;
+                OnPropertyChanged(nameof(CheckingResultBrush));
+            }
+        }
+
+        private Visibility _checkingResultVisibility;
+
+        public Visibility CheckingResultVisibility {
+            get => _checkingResultVisibility;
+            set {
+                _checkingResultVisibility = value;
+                OnPropertyChanged(nameof(CheckingResultVisibility));
             }
         }
 
@@ -78,14 +99,19 @@ namespace SetsDemonstration.ViewModel {
             MySetsWrapper = new ObservableCollection<MySetBaseWrapper>();
 
             AddNewSetCommand = new DelegateCommand((sType) => {
-                Interaction.AddNewSet((string) sType, 1024, MySetsWrapper);
-            });
+                if (ulong.TryParse(MySetSize, out ulong result))
+                    Interaction.AddNewSet((string) sType, result, MySetsWrapper);
+            }, o => MySetSize != null && Regex.IsMatch(MySetSize, @"^[\d]{1,7}$"));
 
             AddValueInSetCommand = new DelegateCommand(AddValueInSet, CanInteractWithSet);
 
             RemoveValueFromSetCommand = new DelegateCommand(RemoveValueFromSet, CanInteractWithSet);
 
             ExistsValueInSetCommand = new DelegateCommand(ExistsValueInSet, CanInteractWithSet);
+
+            ExistsValueInSetButton_LostFocusCommand = new DelegateCommand(o => {
+                CheckingResultVisibility = Visibility.Hidden;
+            });
 
             ComputeOperationCommand = new DelegateCommand(ComputeOperation, CanComputeOperation);
         }
@@ -119,11 +145,14 @@ namespace SetsDemonstration.ViewModel {
         private void ExistsValueInSet(object text) {
             try {
                 Interaction.ExistsValueInSet(ClearInput((string) text), SelectedMySetWrapper.MySet, out int result);
-                ImgResultPath = _imgResultPaths[result];
+                CheckingResultBrush = _checkingResultBrushes[result];
+                CheckingResultVisibility = Visibility.Visible;
             } catch (IndexOutOfMySetRangeException e) {
                 MessageBox.Show(e.Message, "Ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        public ICommand ExistsValueInSetButton_LostFocusCommand { get; }
 
         private bool CanInteractWithSet(object text) {
             return SelectedMySetWrapper != null && IsInputCorrect((string) text);
